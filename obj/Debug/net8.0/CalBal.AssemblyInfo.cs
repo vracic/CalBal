@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CalBal")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d5a90807604b84237025329a655eab94053f5157")]
 [assembly: System.Reflection.AssemblyProductAttribute("CalBal")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CalBal")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

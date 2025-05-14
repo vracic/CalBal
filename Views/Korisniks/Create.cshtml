@@ -49,7 +49,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="RazinaOvlasti" class="control-label"></label>
-                <select asp-for="RazinaOvlasti" class="form-control"></select>
+                <select asp-for="RazinaOvlasti" class="form-control" asp-items="ViewBag.RazinaOvlasti"></select>
                 <span asp-validation-for="RazinaOvlasti" class="text-danger"></span>
             </div>
             <div class="form-group">

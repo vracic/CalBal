@@ -36,7 +36,7 @@ public partial class CalbalContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasPostgresEnum("razina_enum", new[] { "niza", "srednja", "visa", "niska", "visoka" });
+        modelBuilder.HasPostgresEnum("razina_enum", new[] {"niska", "srednja", "visoka" });
 
         modelBuilder.Entity<Aktivnost>(entity =>
         {
@@ -120,17 +120,17 @@ public partial class CalbalContext : DbContext
 
             entity.HasOne(d => d.Cilj).WithMany(p => p.Korisnikciljpreporukas)
                 .HasForeignKey(d => d.CiljId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("korisnikciljpreporuka_cilj_id_fkey");
 
             entity.HasOne(d => d.Korisnik).WithMany(p => p.Korisnikciljpreporukas)
                 .HasForeignKey(d => d.KorisnikId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("korisnikciljpreporuka_korisnik_id_fkey");
 
             entity.HasOne(d => d.Preporuka).WithMany(p => p.Korisnikciljpreporukas)
                 .HasForeignKey(d => d.PreporukaId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("korisnikciljpreporuka_preporuka_id_fkey");
         });
 
@@ -187,12 +187,12 @@ public partial class CalbalContext : DbContext
 
             entity.HasOne(d => d.Aktivnost).WithMany(p => p.Provedbatjakts)
                 .HasForeignKey(d => d.AktivnostId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("provedbatjakt_aktivnost_id_fkey");
 
             entity.HasOne(d => d.Korisnik).WithMany(p => p.Provedbatjakts)
                 .HasForeignKey(d => d.KorisnikId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("provedbatjakt_korisnik_id_fkey");
         });
 
@@ -212,12 +212,12 @@ public partial class CalbalContext : DbContext
 
             entity.HasOne(d => d.Hrana).WithMany(p => p.Unosprehnams)
                 .HasForeignKey(d => d.HranaId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("unosprehnam_hrana_id_fkey");
 
             entity.HasOne(d => d.Korisnik).WithMany(p => p.Unosprehnams)
                 .HasForeignKey(d => d.KorisnikId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("unosprehnam_korisnik_id_fkey");
         });
 

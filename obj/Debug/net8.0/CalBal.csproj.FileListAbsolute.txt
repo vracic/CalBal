@@ -243,3 +243,4 @@ C:\IS projekt\mvc\CalBal\obj\Debug\net8.0\refint\CalBal.dll
 C:\IS projekt\mvc\CalBal\obj\Debug\net8.0\CalBal.pdb
 C:\IS projekt\mvc\CalBal\obj\Debug\net8.0\CalBal.genruntimeconfig.cache
 C:\IS projekt\mvc\CalBal\obj\Debug\net8.0\ref\CalBal.dll
+C:\IS projekt\mvc\CalBal\obj\Debug\net8.0\CalBal.sourcelink.json

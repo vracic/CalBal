@@ -1,7 +1,9 @@
 ﻿@model CalBal.Models.Korisnik
+@using CalBal.Models.Enums
 
 @{
     ViewData["Title"] = "Edit";
+    var isAdmin = User.FindFirst("RazinaOvlasti")?.Value == RazinaOvlasti.visoka.ToString();
 }
 
 <h1>Edit</h1>
@@ -29,11 +31,6 @@
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Lozinka" class="control-label"></label>
-                <input asp-for="Lozinka" class="form-control" />
-                <span asp-validation-for="Lozinka" class="text-danger"></span>
-            </div>
-            <div class="form-group">
                 <label asp-for="DatumRodenja" class="control-label"></label>
                 <input asp-for="DatumRodenja" class="form-control" />
                 <span asp-validation-for="DatumRodenja" class="text-danger"></span>
@@ -49,9 +46,12 @@
                 <span asp-validation-for="Tezina" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="RazinaOvlasti" class="control-label"></label>
-                <select asp-for="RazinaOvlasti" class="form-control"></select>
-                <span asp-validation-for="RazinaOvlasti" class="text-danger"></span>
+                @if (isAdmin)
+                {
+                    <label asp-for="RazinaOvlasti" class="control-label"></label>
+                    <select asp-for="RazinaOvlasti" class="form-control" asp-items="ViewBag.RazinaOvlasti"></select>
+                    <span asp-validation-for="RazinaOvlasti" class="text-danger"></span>
+                }
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

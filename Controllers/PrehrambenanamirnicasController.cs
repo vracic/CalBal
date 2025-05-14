@@ -21,12 +21,20 @@ namespace CalBal.Controllers
         // GET: Prehrambenanamirnicas
         public async Task<IActionResult> Index()
         {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "Korisniks");
+            }
             return View(await _context.Prehrambenanamirnicas.ToListAsync());
         }
 
         // GET: Prehrambenanamirnicas/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
+            {
+                return RedirectToAction("Login", "Korisniks");
+            }
             if (id == null)
             {
                 return NotFound();
@@ -45,6 +53,10 @@ namespace CalBal.Controllers
         // GET: Prehrambenanamirnicas/Create
         public IActionResult Create()
         {
+            if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
+            {
+                return RedirectToAction("Login", "Korisniks");
+            }
             return View();
         }
 
@@ -55,6 +67,10 @@ namespace CalBal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("PrehrambenaNamirnicaId,Naziv,Kalorije,Proteini,Masti,Ugljikohidrati")] Prehrambenanamirnica prehrambenanamirnica)
         {
+            if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
+            {
+                return RedirectToAction("Login", "Korisniks");
+            }
             if (ModelState.IsValid)
             {
                 _context.Add(prehrambenanamirnica);
@@ -67,6 +83,10 @@ namespace CalBal.Controllers
         // GET: Prehrambenanamirnicas/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
+            {
+                return RedirectToAction("Login", "Korisniks");
+            }
             if (id == null)
             {
                 return NotFound();
@@ -87,6 +107,10 @@ namespace CalBal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("PrehrambenaNamirnicaId,Naziv,Kalorije,Proteini,Masti,Ugljikohidrati")] Prehrambenanamirnica prehrambenanamirnica)
         {
+            if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
+            {
+                return RedirectToAction("Login", "Korisniks");
+            }
             if (id != prehrambenanamirnica.PrehrambenaNamirnicaId)
             {
                 return NotFound();
@@ -118,6 +142,10 @@ namespace CalBal.Controllers
         // GET: Prehrambenanamirnicas/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
+            if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
+            {
+                return RedirectToAction("Login", "Korisniks");
+            }
             if (id == null)
             {
                 return NotFound();
@@ -138,6 +166,10 @@ namespace CalBal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
+            {
+                return RedirectToAction("Login", "Korisniks");
+            }
             var prehrambenanamirnica = await _context.Prehrambenanamirnicas.FindAsync(id);
             if (prehrambenanamirnica != null)
             {

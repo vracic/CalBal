@@ -1,0 +1,122 @@
+@model CalBal.Models.Korisnik
+@using Microsoft.AspNetCore.Mvc.ViewFeatures
+@inject Microsoft.AspNetCore.Mvc.ModelBinding.IModelMetadataProvider MetadataProvider
+
+@{
+    ViewData["Title"] = "User Details (Master-Detail)";
+}
+
+<h2>User Details</h2>
+<div>
+    <h4>@Model.Ime @Model.Prezime</h4>
+    <p>Email: @Model.Email</p>
+    <p>Date of Birth: @Model.DatumRodenja?.ToString("yyyy-MM-dd")</p>
+    <p>Height: @Model.Visina</p>
+    <p>Weight: @Model.Tezina</p>
+    <p>Role: @Model.RazinaOvlasti</p>
+    <a asp-action="Edit" asp-route-id="@Model.KorisnikId" class="btn btn-primary btn-sm">Edit User</a>
+</div>
+
+<hr />
+
+<h4>Provedba Aktivnosti</h4>
+@await Html.PartialAsync(
+    "_AddProvedbaAktivnostPartial",
+    new CalBal.Models.Provedbatjakt(),
+    new ViewDataDictionary(MetadataProvider, ViewData.ModelState) { { "Aktivnosti", ViewBag.Aktivnosti } }
+)
+<table class="table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Activity</th>
+            <th>Duration (min)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var p in Model.Provedbatjakts)
+    {
+        <tr>
+            <td>@p.Datum</td>
+            <td>@p.Aktivnost?.Naziv</td>
+            <td>@p.Trajanje</td>
+            <td>
+                <a asp-controller="Provedbatjakts" asp-action="Edit" asp-route-id="@p.ProvedbaTjAktId" class="btn btn-warning btn-sm">Edit</a>
+                <a asp-controller="Provedbatjakts" asp-action="Delete" asp-route-id="@p.ProvedbaTjAktId" class="btn btn-danger btn-sm">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<h4>Unos Prehrambenih Namirnica</h4>
+@await Html.PartialAsync(
+    "_AddUnosPrehrambenaNamirnicaPartial",
+    new CalBal.Models.Unosprehnam(),
+    new ViewDataDictionary(MetadataProvider, ViewData.ModelState) { { "PrehrambeneNamirnice", ViewBag.PrehrambeneNamirnice } }
+)
+<table class="table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Food</th>
+            <th>Quantity</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var u in Model.Unosprehnams)
+    {
+        <tr>
+            <td>@u.Datum</td>
+            <td>@u.Hrana?.Naziv</td>
+            <td>@u.Kolicina</td>
+            <td>
+                <a asp-controller="Unosprehnams" asp-action="Edit" asp-route-id="@u.UnosPrehNamId" class="btn btn-warning btn-sm">Edit</a>
+                <a asp-controller="Unosprehnams" asp-action="Delete" asp-route-id="@u.UnosPrehNamId" class="btn btn-danger btn-sm">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<a asp-action="Index">Back to List</a>
+
+@section Scripts {
+<script>
+    // Add Activity
+    $('#addProvedbaForm').submit(function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: '@Url.Action("AddProvedbaAktivnostAjax", "Korisniks")',
+            type: 'POST',
+            data: $(this).serialize(),
+            success: function (result) {
+                $('#addProvedbaResult').html('<div class="alert alert-success">Activity added!</div>');
+                location.reload();
+            },
+            error: function () {
+                $('#addProvedbaResult').html('<div class="alert alert-danger">Error adding activity.</div>');
+            }
+        });
+    });
+
+    // Add Food Entry
+    $('#addUnosForm').submit(function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: '@Url.Action("AddUnosPrehrambenaNamirnicaAjax", "Korisniks")',
+            type: 'POST',
+            data: $(this).serialize(),
+            success: function (result) {
+                $('#addUnosResult').html('<div class="alert alert-success">Food entry added!</div>');
+                location.reload();
+            },
+            error: function () {
+                $('#addUnosResult').html('<div class="alert alert-danger">Error adding food entry.</div>');
+            }
+        });
+    });
+</script>
+}

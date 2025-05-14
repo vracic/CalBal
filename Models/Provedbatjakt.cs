@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System;
 using System.Collections.Generic;
 
 namespace CalBal.Models;
@@ -15,7 +16,9 @@ public partial class Provedbatjakt
 
     public int AktivnostId { get; set; }
 
+    [ValidateNever]
     public virtual Aktivnost Aktivnost { get; set; } = null!;
 
+    [ValidateNever]
     public virtual Korisnik Korisnik { get; set; } = null!;
 }

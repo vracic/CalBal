@@ -2,9 +2,7 @@
 {
     public enum RazinaOvlasti
     {
-        niza,
         srednja,
-        visa,
         niska,
         visoka
     }
