@@ -1,8 +1,10 @@
 @model CalBal.Models.Provedbatjakt
 @{
     var aktivnosti = ViewBag.Aktivnosti as List<CalBal.Models.Aktivnost>;
+    var korisnikId = ViewBag.KorisnikId as int?;
 }
 <form id="addProvedbaForm">
+    <input type="hidden" asp-for="KorisnikId" value="@korisnikId" />
     <div class="form-group">
         <label>Datum</label>
         <input asp-for="Datum" class="form-control" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" />

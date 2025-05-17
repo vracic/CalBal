@@ -23,7 +23,7 @@
 @await Html.PartialAsync(
     "_AddProvedbaAktivnostPartial",
     new CalBal.Models.Provedbatjakt(),
-    new ViewDataDictionary(MetadataProvider, ViewData.ModelState) { { "Aktivnosti", ViewBag.Aktivnosti } }
+    new ViewDataDictionary(MetadataProvider, ViewData.ModelState) { { "Aktivnosti", ViewBag.Aktivnosti }, { "KorisnikId", Model.KorisnikId } }
 )
 <table class="table">
     <thead>
@@ -31,20 +31,49 @@
             <th>Date</th>
             <th>Activity</th>
             <th>Duration (min)</th>
+            <th>Calories Used</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
     @foreach (var p in Model.Provedbatjakts)
     {
-        <tr>
-            <td>@p.Datum</td>
+        <tr id="row-provedba-@p.ProvedbaTjAktId">
+            <td>@p.Datum.ToString("yyyy-MM-dd")</td>
             <td>@p.Aktivnost?.Naziv</td>
             <td>@p.Trajanje</td>
             <td>
-                <a asp-controller="Provedbatjakts" asp-action="Edit" asp-route-id="@p.ProvedbaTjAktId" class="btn btn-warning btn-sm">Edit</a>
-                <a asp-controller="Provedbatjakts" asp-action="Delete" asp-route-id="@p.ProvedbaTjAktId" class="btn btn-danger btn-sm">Delete</a>
+                @((p.Trajanje * (p.Aktivnost?.Potrosnja ?? 0) / 60.0m).ToString("0.##"))
             </td>
+            <td>
+                <button class="btn btn-warning btn-sm" onclick="showEditProvedba(@p.ProvedbaTjAktId)">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteProvedba(@p.ProvedbaTjAktId)">Delete</button>
+            </td>
+        </tr>
+        <tr id="edit-provedba-@p.ProvedbaTjAktId" style="display:none;">
+            <form class="editProvedbaForm" data-id="@p.ProvedbaTjAktId">
+                <td>
+                    <input type="hidden" name="ProvedbaTjAktId" value="@p.ProvedbaTjAktId" />
+                    <input type="date" name="Datum" value="@p.Datum.ToString("yyyy-MM-dd")" class="form-control" />
+                </td>
+                <td>
+                    <select name="AktivnostId" class="form-control">
+                        @foreach (var a in ViewBag.Aktivnosti)
+                        {
+                            <option value="@a.AktivnostId" selected="@(a.AktivnostId == p.AktivnostId ? "selected" : null)">@a.Naziv</option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <input type="number" name="Trajanje" value="@p.Trajanje" class="form-control" />
+                </td>
+                <td></td>
+                <td>
+                    <button type="submit" class="btn btn-success btn-sm">Save</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="hideEditProvedba(@p.ProvedbaTjAktId)">Cancel</button>
+                </td>
+            </form>
+            <div class="editProvedbaResult"></div>
         </tr>
     }
     </tbody>
@@ -54,7 +83,7 @@
 @await Html.PartialAsync(
     "_AddUnosPrehrambenaNamirnicaPartial",
     new CalBal.Models.Unosprehnam(),
-    new ViewDataDictionary(MetadataProvider, ViewData.ModelState) { { "PrehrambeneNamirnice", ViewBag.PrehrambeneNamirnice } }
+    new ViewDataDictionary(MetadataProvider, ViewData.ModelState) { { "PrehrambeneNamirnice", ViewBag.PrehrambeneNamirnice }, { "KorisnikId", Model.KorisnikId} }
 )
 <table class="table">
     <thead>
@@ -62,20 +91,49 @@
             <th>Date</th>
             <th>Food</th>
             <th>Quantity</th>
+            <th>Calories Intake</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
     @foreach (var u in Model.Unosprehnams)
     {
-        <tr>
-            <td>@u.Datum</td>
+        <tr id="row-unos-@u.UnosPrehNamId">
+            <td>@u.Datum.ToString("yyyy-MM-dd")</td>
             <td>@u.Hrana?.Naziv</td>
             <td>@u.Kolicina</td>
             <td>
-                <a asp-controller="Unosprehnams" asp-action="Edit" asp-route-id="@u.UnosPrehNamId" class="btn btn-warning btn-sm">Edit</a>
-                <a asp-controller="Unosprehnams" asp-action="Delete" asp-route-id="@u.UnosPrehNamId" class="btn btn-danger btn-sm">Delete</a>
+                @((u.Kolicina * (u.Hrana?.Kalorije ?? 0)).ToString("0.##"))
             </td>
+            <td>
+                <button class="btn btn-warning btn-sm" onclick="showEditUnos(@u.UnosPrehNamId)">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteUnos(@u.UnosPrehNamId)">Delete</button>
+            </td>
+        </tr>
+        <tr id="edit-unos-@u.UnosPrehNamId" style="display:none;">
+            <form class="editUnosForm" data-id="@u.UnosPrehNamId">
+                <td>
+                    <input type="hidden" name="UnosPrehNamId" value="@u.UnosPrehNamId" />
+                    <input type="date" name="Datum" value="@u.Datum.ToString("yyyy-MM-dd")" class="form-control" />
+                </td>
+                <td>
+                    <select name="HranaId" class="form-control">
+                        @foreach (var n in ViewBag.PrehrambeneNamirnice)
+                        {
+                            <option value="@n.PrehrambenaNamirnicaId" selected="@(n.PrehrambenaNamirnicaId == u.HranaId ? "selected" : null)">@n.Naziv</option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <input type="number" name="Kolicina" value="@u.Kolicina" class="form-control" />
+                </td>
+                <td></td>
+                <td>
+                    <button type="submit" class="btn btn-success btn-sm">Save</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="hideEditUnos(@u.UnosPrehNamId)">Cancel</button>
+                </td>
+            </form>
+            <div class="editUnosResult"></div>
         </tr>
     }
     </tbody>
@@ -85,6 +143,132 @@
 
 @section Scripts {
 <script>
+    // Helper for rendering model errors from any response format
+    function renderModelErrors(response, targetSelector) {
+        let errors = null;
+        if (response) {
+            if (response.errors) {
+                errors = response.errors;
+            } else {
+                errors = response;
+            }
+        }
+        if (errors) {
+            let errorList = '<ul>';
+            for (let key in errors) {
+                for (let msg of errors[key]) {
+                    errorList += '<li>' + msg + '</li>';
+                }
+            }
+            errorList += '</ul>';
+            $(targetSelector).html('<div class="alert alert-danger">' + errorList + '</div>');
+        } else {
+            $(targetSelector).html('<div class="alert alert-danger">An error occurred.</div>');
+        }
+    }
+
+    // Show/hide edit forms
+    function showEditProvedba(id) {
+        $('#row-provedba-' + id).hide();
+        $('#edit-provedba-' + id).show();
+    }
+    function hideEditProvedba(id) {
+        $('#edit-provedba-' + id).hide();
+        $('#row-provedba-' + id).show();
+    }
+    function showEditUnos(id) {
+        $('#row-unos-' + id).hide();
+        $('#edit-unos-' + id).show();
+    }
+    function hideEditUnos(id) {
+        $('#edit-unos-' + id).hide();
+        $('#row-unos-' + id).show();
+    }
+
+    // AJAX update for Provedba
+    $('.editProvedbaForm').submit(function (e) {
+        e.preventDefault();
+        var form = $(this);
+        $.ajax({
+            url: '@Url.Action("UpdateProvedbaAktivnostAjax", "Korisniks")',
+            type: 'POST',
+            data: form.serialize(),
+            success: function () {
+                location.reload();
+            },
+            error: function (xhr) {
+                let response = xhr.responseJSON;
+                if (!response && xhr.responseText) {
+                    try { response = JSON.parse(xhr.responseText); } catch (e) { }
+                }
+                renderModelErrors(response, form.next('.editProvedbaResult'));
+            }
+        });
+    });
+
+    // AJAX update for Unos
+    $('.editUnosForm').submit(function (e) {
+        e.preventDefault();
+        var form = $(this);
+        $.ajax({
+            url: '@Url.Action("UpdateUnosPrehrambenaNamirnicaAjax", "Korisniks")',
+            type: 'POST',
+            data: form.serialize(),
+            success: function () {
+                location.reload();
+            },
+            error: function (xhr) {
+                let response = xhr.responseJSON;
+                if (!response && xhr.responseText) {
+                    try { response = JSON.parse(xhr.responseText); } catch (e) { }
+                }
+                renderModelErrors(response, form.next('.editUnosResult'));
+            }
+        });
+    });
+
+    // AJAX delete for Provedba
+    function deleteProvedba(id) {
+        if (!confirm('Are you sure you want to delete this activity?')) return;
+        $.ajax({
+            url: '@Url.Action("DeleteProvedbaAktivnostAjax", "Korisniks")',
+            type: 'POST',
+            data: { id: id },
+            success: function () {
+                $('#row-provedba-' + id).remove();
+                $('#edit-provedba-' + id).remove();
+            },
+            error: function (xhr) {
+                let response = xhr.responseJSON;
+                if (!response && xhr.responseText) {
+                    try { response = JSON.parse(xhr.responseText); } catch (e) { }
+                }
+                renderModelErrors(response, '#addProvedbaResult');
+            }
+        });
+    }
+
+    // AJAX delete for Unos
+    function deleteUnos(id) {
+        if (!confirm('Are you sure you want to delete this food entry?')) return;
+        $.ajax({
+            url: '@Url.Action("DeleteUnosPrehrambenaNamirnicaAjax", "Korisniks")',
+            type: 'POST',
+            data: { id: id },
+            success: function () {
+                $('#row-unos-' + id).remove();
+                $('#edit-unos-' + id).remove();
+            },
+            error: function (xhr) {
+                let response = xhr.responseJSON;
+                if (!response && xhr.responseText) {
+                    try { response = JSON.parse(xhr.responseText); } catch (e) { }
+                }
+                renderModelErrors(response, '#addUnosResult');
+            }
+        });
+    }
+
     // Add Activity
     $('#addProvedbaForm').submit(function (e) {
         e.preventDefault();
@@ -93,11 +277,14 @@
             type: 'POST',
             data: $(this).serialize(),
             success: function (result) {
-                $('#addProvedbaResult').html('<div class="alert alert-success">Activity added!</div>');
                 location.reload();
             },
-            error: function () {
-                $('#addProvedbaResult').html('<div class="alert alert-danger">Error adding activity.</div>');
+            error: function (xhr) {
+                let response = xhr.responseJSON;
+                if (!response && xhr.responseText) {
+                    try { response = JSON.parse(xhr.responseText); } catch (e) { }
+                }
+                renderModelErrors(response, '#addProvedbaResult');
             }
         });
     });
@@ -113,8 +300,12 @@
                 $('#addUnosResult').html('<div class="alert alert-success">Food entry added!</div>');
                 location.reload();
             },
-            error: function () {
-                $('#addUnosResult').html('<div class="alert alert-danger">Error adding food entry.</div>');
+            error: function (xhr) {
+                let response = xhr.responseJSON;
+                if (!response && xhr.responseText) {
+                    try { response = JSON.parse(xhr.responseText); } catch (e) { }
+                }
+                renderModelErrors(response, '#addUnosResult');
             }
         });
     });

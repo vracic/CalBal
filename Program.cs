@@ -16,11 +16,6 @@ var dataSource = dataSourceBuilder.Build();
 
 builder.Services.AddDbContext<CalbalContext>(options => options.UseNpgsql(dataSource));
 
-//builder.Services.AddDbContext<CalbalContext>(options =>
-//    options.UseNpgsql(builder.Configuration.GetConnectionString("CalbalDatabase")));
-
-
-
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
