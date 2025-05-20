@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace CalBal.Models;
@@ -25,6 +26,9 @@ public partial class Unosprehnam : IValidatableObject
 
     [ValidateNever]
     public virtual Korisnik Korisnik { get; set; } = null!;
+
+    [NotMapped]
+    public decimal UneseneKalorije { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

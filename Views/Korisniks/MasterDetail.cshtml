@@ -6,140 +6,160 @@
     ViewData["Title"] = "User Details (Master-Detail)";
 }
 
-<h2>User Details</h2>
+<h2>Korisnicki podaci</h2>
 <div>
     <h4>@Model.Ime @Model.Prezime</h4>
     <p>Email: @Model.Email</p>
-    <p>Date of Birth: @Model.DatumRodenja?.ToString("yyyy-MM-dd")</p>
-    <p>Height: @Model.Visina</p>
-    <p>Weight: @Model.Tezina</p>
-    <p>Role: @Model.RazinaOvlasti</p>
-    <a asp-action="Edit" asp-route-id="@Model.KorisnikId" class="btn btn-primary btn-sm">Edit User</a>
+    <p>Datum rodenja: @Model.DatumRodenja?.ToString("yyyy-MM-dd")</p>
+    <p>Visina: @Model.Visina</p>
+    <p>Tezina: @Model.Tezina</p>
+    <p>Uloga: @Model.RazinaOvlasti</p>
+    <a asp-action="Edit" asp-route-id="@Model.KorisnikId" class="btn btn-primary btn-sm">Uredi korisnika</a>
 </div>
 
 <hr />
 
-<h4>Provedba Aktivnosti</h4>
-@await Html.PartialAsync(
-    "_AddProvedbaAktivnostPartial",
-    new CalBal.Models.Provedbatjakt(),
-    new ViewDataDictionary(MetadataProvider, ViewData.ModelState) { { "Aktivnosti", ViewBag.Aktivnosti }, { "KorisnikId", Model.KorisnikId } }
-)
-<table class="table">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Activity</th>
-            <th>Duration (min)</th>
-            <th>Calories Used</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var p in Model.Provedbatjakts)
-    {
-        <tr id="row-provedba-@p.ProvedbaTjAktId">
-            <td>@p.Datum.ToString("yyyy-MM-dd")</td>
-            <td>@p.Aktivnost?.Naziv</td>
-            <td>@p.Trajanje</td>
-            <td>
-                @((p.Trajanje * (p.Aktivnost?.Potrosnja ?? 0) / 60.0m).ToString("0.##"))
-            </td>
-            <td>
-                <button class="btn btn-warning btn-sm" onclick="showEditProvedba(@p.ProvedbaTjAktId)">Edit</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteProvedba(@p.ProvedbaTjAktId)">Delete</button>
-            </td>
-        </tr>
-        <tr id="edit-provedba-@p.ProvedbaTjAktId" style="display:none;">
-            <form class="editProvedbaForm" data-id="@p.ProvedbaTjAktId">
-                <td>
-                    <input type="hidden" name="ProvedbaTjAktId" value="@p.ProvedbaTjAktId" />
-                    <input type="date" name="Datum" value="@p.Datum.ToString("yyyy-MM-dd")" class="form-control" />
-                </td>
-                <td>
-                    <select name="AktivnostId" class="form-control">
-                        @foreach (var a in ViewBag.Aktivnosti)
-                        {
-                            <option value="@a.AktivnostId" selected="@(a.AktivnostId == p.AktivnostId ? "selected" : null)">@a.Naziv</option>
-                        }
-                    </select>
-                </td>
-                <td>
-                    <input type="number" name="Trajanje" value="@p.Trajanje" class="form-control" />
-                </td>
-                <td></td>
-                <td>
-                    <button type="submit" class="btn btn-success btn-sm">Save</button>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="hideEditProvedba(@p.ProvedbaTjAktId)">Cancel</button>
-                </td>
-            </form>
-            <div class="editProvedbaResult"></div>
-        </tr>
-    }
-    </tbody>
-</table>
+<form method="get" asp-action="MasterDetail" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="activitySearch" value="@ViewBag.ActivitySearch" class="form-control" placeholder="Pretrazi aktivnosti..." />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="foodSearch" value="@ViewBag.FoodSearch" class="form-control" placeholder="Pretrazi namirnice..." />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Pretrazi</button>
+    </div>
+</form>
 
-<h4>Unos Prehrambenih Namirnica</h4>
-@await Html.PartialAsync(
-    "_AddUnosPrehrambenaNamirnicaPartial",
-    new CalBal.Models.Unosprehnam(),
-    new ViewDataDictionary(MetadataProvider, ViewData.ModelState) { { "PrehrambeneNamirnice", ViewBag.PrehrambeneNamirnice }, { "KorisnikId", Model.KorisnikId} }
-)
-<table class="table">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Food</th>
-            <th>Quantity</th>
-            <th>Calories Intake</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var u in Model.Unosprehnams)
-    {
-        <tr id="row-unos-@u.UnosPrehNamId">
-            <td>@u.Datum.ToString("yyyy-MM-dd")</td>
-            <td>@u.Hrana?.Naziv</td>
-            <td>@u.Kolicina</td>
-            <td>
-                @((u.Kolicina * (u.Hrana?.Kalorije ?? 0)).ToString("0.##"))
-            </td>
-            <td>
-                <button class="btn btn-warning btn-sm" onclick="showEditUnos(@u.UnosPrehNamId)">Edit</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteUnos(@u.UnosPrehNamId)">Delete</button>
-            </td>
-        </tr>
-        <tr id="edit-unos-@u.UnosPrehNamId" style="display:none;">
-            <form class="editUnosForm" data-id="@u.UnosPrehNamId">
+<h4>
+    Provedba Aktivnosti
+    <button class="btn btn-link btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#provedbaTableCollapse" aria-expanded="true" aria-controls="provedbaTableCollapse">
+        Prikaži/Sakrij
+    </button>
+</h4>
+<div class="collapse show" id="provedbaTableCollapse">
+    @await Html.PartialAsync(
+        "_AddProvedbaAktivnostPartial",
+        new CalBal.Models.Provedbatjakt(),
+        new ViewDataDictionary(MetadataProvider, ViewData.ModelState) { { "Aktivnosti", ViewBag.Aktivnosti }, { "KorisnikId", Model.KorisnikId } }
+    )
+    <div id="addProvedbaSuccess"></div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Datum</th>
+                <th>Aktivnost</th>
+                <th>Trajanje (min)</th>
+                <th>Potrosene kalorije</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var p in Model.Provedbatjakts)
+        {
+            <tr id="row-provedba-@p.ProvedbaTjAktId">
+                <td>@p.Datum.ToString("yyyy-MM-dd")</td>
+                <td>@p.Aktivnost?.Naziv</td>
+                <td>@p.Trajanje</td>
+                <td>@p.PotroseneKalorije.ToString("0.##")</td>
                 <td>
-                    <input type="hidden" name="UnosPrehNamId" value="@u.UnosPrehNamId" />
-                    <input type="date" name="Datum" value="@u.Datum.ToString("yyyy-MM-dd")" class="form-control" />
+                    <button class="btn btn-warning btn-sm" onclick="showEditProvedba(@p.ProvedbaTjAktId)">Uredi</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteProvedba(@p.ProvedbaTjAktId)">Obrisi</button>
                 </td>
-                <td>
-                    <select name="HranaId" class="form-control">
-                        @foreach (var n in ViewBag.PrehrambeneNamirnice)
-                        {
-                            <option value="@n.PrehrambenaNamirnicaId" selected="@(n.PrehrambenaNamirnicaId == u.HranaId ? "selected" : null)">@n.Naziv</option>
-                        }
-                    </select>
-                </td>
-                <td>
-                    <input type="number" name="Kolicina" value="@u.Kolicina" class="form-control" />
-                </td>
-                <td></td>
-                <td>
-                    <button type="submit" class="btn btn-success btn-sm">Save</button>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="hideEditUnos(@u.UnosPrehNamId)">Cancel</button>
-                </td>
-            </form>
-            <div class="editUnosResult"></div>
-        </tr>
-    }
-    </tbody>
-</table>
+            </tr>
+            <tr id="edit-provedba-@p.ProvedbaTjAktId" style="display:none;">
+                <form class="editProvedbaForm" data-id="@p.ProvedbaTjAktId">
+                    <td>
+                        <input type="hidden" name="ProvedbaTjAktId" value="@p.ProvedbaTjAktId" />
+                        <input type="date" name="Datum" value="@p.Datum.ToString("yyyy-MM-dd")" class="form-control" />
+                    </td>
+                    <td>
+                        <select name="AktivnostId" class="form-control">
+                            @foreach (var a in ViewBag.Aktivnosti)
+                            {
+                                <option value="@a.AktivnostId" selected="@(a.AktivnostId == p.AktivnostId ? "selected" : null)">@a.Naziv</option>
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" name="Trajanje" value="@p.Trajanje" class="form-control" />
+                    </td>
+                    <td></td>
+                    <td>
+                        <button type="submit" class="btn btn-success btn-sm">Spremi</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="hideEditProvedba(@p.ProvedbaTjAktId)">Odustani</button>
+                    </td>
+                </form>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
 
-<a asp-action="Index">Back to List</a>
+<h4>
+    Unos Prehrambenih Namirnica
+    <button class="btn btn-link btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#unosTableCollapse" aria-expanded="true" aria-controls="unosTableCollapse">
+        Prikaži/Sakrij
+    </button>
+</h4>
+<div class="collapse show" id="unosTableCollapse">
+    @await Html.PartialAsync(
+        "_AddUnosPrehrambenaNamirnicaPartial",
+        new CalBal.Models.Unosprehnam(),
+        new ViewDataDictionary(MetadataProvider, ViewData.ModelState) { { "PrehrambeneNamirnice", ViewBag.PrehrambeneNamirnice }, { "KorisnikId", Model.KorisnikId} }
+    )
+    <div id="addUnosSuccess"></div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Datum</th>
+                <th>Namirnica</th>
+                <th>Kolicina</th>
+                <th>Unesene kalorije</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var u in Model.Unosprehnams)
+        {
+            <tr id="row-unos-@u.UnosPrehNamId">
+                <td>@u.Datum.ToString("yyyy-MM-dd")</td>
+                <td>@u.Hrana?.Naziv</td>
+                <td>@u.Kolicina</td>
+                <td>@u.UneseneKalorije.ToString("0.##")</td>
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick="showEditUnos(@u.UnosPrehNamId)">Uredi</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteUnos(@u.UnosPrehNamId)">Obrisi</button>
+                </td>
+            </tr>
+            <tr id="edit-unos-@u.UnosPrehNamId" style="display:none;">
+                <form class="editUnosForm" data-id="@u.UnosPrehNamId">
+                    <td>
+                        <input type="hidden" name="UnosPrehNamId" value="@u.UnosPrehNamId" />
+                        <input type="date" name="Datum" value="@u.Datum.ToString("yyyy-MM-dd")" class="form-control" />
+                    </td>
+                    <td>
+                        <select name="HranaId" class="form-control">
+                            @foreach (var n in ViewBag.PrehrambeneNamirnice)
+                            {
+                                <option value="@n.PrehrambenaNamirnicaId" selected="@(n.PrehrambenaNamirnicaId == u.HranaId ? "selected" : null)">@n.Naziv</option>
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" name="Kolicina" value="@u.Kolicina" class="form-control" />
+                    </td>
+                    <td></td>
+                    <td>
+                        <button type="submit" class="btn btn-success btn-sm">Spremi</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="hideEditUnos(@u.UnosPrehNamId)">Odustani</button>
+                    </td>
+                </form>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
 
 @section Scripts {
 <script>
@@ -190,7 +210,7 @@
         e.preventDefault();
         var form = $(this);
         $.ajax({
-            url: '@Url.Action("UpdateProvedbaAktivnostAjax", "Korisniks")',
+            url: '@Url.Action("Update", "Provedbatjakt")',
             type: 'POST',
             data: form.serialize(),
             success: function () {
@@ -211,7 +231,7 @@
         e.preventDefault();
         var form = $(this);
         $.ajax({
-            url: '@Url.Action("UpdateUnosPrehrambenaNamirnicaAjax", "Korisniks")',
+            url: '@Url.Action("Update", "Unosprehnam")',
             type: 'POST',
             data: form.serialize(),
             success: function () {
@@ -229,14 +249,15 @@
 
     // AJAX delete for Provedba
     function deleteProvedba(id) {
-        if (!confirm('Are you sure you want to delete this activity?')) return;
+        if (!confirm('Jeste li sigurni da zelite obrisati aktivnost?')) return;
         $.ajax({
-            url: '@Url.Action("DeleteProvedbaAktivnostAjax", "Korisniks")',
+            url: '@Url.Action("Delete", "Provedbatjakt")',
             type: 'POST',
             data: { id: id },
             success: function () {
                 $('#row-provedba-' + id).remove();
                 $('#edit-provedba-' + id).remove();
+                $('#addProvedbaSuccess').html('<div class="alert alert-success">Uspjesno obrisana aktivnost!</div>');
             },
             error: function (xhr) {
                 let response = xhr.responseJSON;
@@ -250,14 +271,15 @@
 
     // AJAX delete for Unos
     function deleteUnos(id) {
-        if (!confirm('Are you sure you want to delete this food entry?')) return;
+        if (!confirm('Jeste li sigurni da zelite obrisani unos namirnice?')) return;
         $.ajax({
-            url: '@Url.Action("DeleteUnosPrehrambenaNamirnicaAjax", "Korisniks")',
+            url: '@Url.Action("Delete", "Unosprehnam")',
             type: 'POST',
             data: { id: id },
             success: function () {
                 $('#row-unos-' + id).remove();
                 $('#edit-unos-' + id).remove();
+                $('#addUnosSuccess').html('<div class="alert alert-success">Uspjesno obrisan unos namirnice!</div>');
             },
             error: function (xhr) {
                 let response = xhr.responseJSON;
@@ -273,7 +295,7 @@
     $('#addProvedbaForm').submit(function (e) {
         e.preventDefault();
         $.ajax({
-            url: '@Url.Action("AddProvedbaAktivnostAjax", "Korisniks")',
+            url: '@Url.Action("Add", "Provedbatjakt")',
             type: 'POST',
             data: $(this).serialize(),
             success: function (result) {
@@ -293,7 +315,7 @@
     $('#addUnosForm').submit(function (e) {
         e.preventDefault();
         $.ajax({
-            url: '@Url.Action("AddUnosPrehrambenaNamirnicaAjax", "Korisniks")',
+            url: '@Url.Action("Add", "Unosprehnam")',
             type: 'POST',
             data: $(this).serialize(),
             success: function (result) {

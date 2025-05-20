@@ -23,7 +23,7 @@ namespace CalBal.Controllers
         {
             if (!User.Identity.IsAuthenticated)
             {
-                return RedirectToAction("Login", "Korisniks");
+                return RedirectToAction("Login", "Auth");
             }
             return View(await _context.Prehrambenanamirnicas.ToListAsync());
         }
@@ -33,7 +33,7 @@ namespace CalBal.Controllers
         {
             if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
             {
-                return RedirectToAction("Login", "Korisniks");
+                return RedirectToAction("Login", "Auth");
             }
             if (id == null)
             {
@@ -55,7 +55,7 @@ namespace CalBal.Controllers
         {
             if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
             {
-                return RedirectToAction("Login", "Korisniks");
+                return RedirectToAction("Login", "Auth");
             }
             return View();
         }
@@ -69,7 +69,7 @@ namespace CalBal.Controllers
         {
             if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
             {
-                return RedirectToAction("Login", "Korisniks");
+                return RedirectToAction("Login", "Auth");
             }
             if (ModelState.IsValid)
             {
@@ -85,7 +85,7 @@ namespace CalBal.Controllers
         {
             if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
             {
-                return RedirectToAction("Login", "Korisniks");
+                return RedirectToAction("Login", "Auth");
             }
             if (id == null)
             {
@@ -109,7 +109,7 @@ namespace CalBal.Controllers
         {
             if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
             {
-                return RedirectToAction("Login", "Korisniks");
+                return RedirectToAction("Login", "Auth");
             }
             if (id != prehrambenanamirnica.PrehrambenaNamirnicaId)
             {
@@ -144,7 +144,7 @@ namespace CalBal.Controllers
         {
             if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
             {
-                return RedirectToAction("Login", "Korisniks");
+                return RedirectToAction("Login", "Auth");
             }
             if (id == null)
             {
@@ -168,7 +168,7 @@ namespace CalBal.Controllers
         {
             if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
             {
-                return RedirectToAction("Login", "Korisniks");
+                return RedirectToAction("Login", "Auth");
             }
             var prehrambenanamirnica = await _context.Prehrambenanamirnicas.FindAsync(id);
             if (prehrambenanamirnica != null)

@@ -1,5 +1,6 @@
 using CalBal.Models;
 using CalBal.Models.Enums;
+using CalBal.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -22,6 +23,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Korisniks/Login";
         options.LogoutPath = "/Korisniks/Logout";
     });
+
+builder.Services.AddScoped<KorisnikService>();
 
 var app = builder.Build();
 
@@ -46,3 +49,8 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+namespace CalBal
+{
+    public partial class Program { }
+}

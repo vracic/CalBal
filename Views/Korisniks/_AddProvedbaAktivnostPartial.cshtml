@@ -3,14 +3,14 @@
     var aktivnosti = ViewBag.Aktivnosti as List<CalBal.Models.Aktivnost>;
     var korisnikId = ViewBag.KorisnikId as int?;
 }
-<form id="addProvedbaForm">
+<form id="addProvedbaForm" class="row align-items-end g-2">
     <input type="hidden" asp-for="KorisnikId" value="@korisnikId" />
-    <div class="form-group">
-        <label>Datum</label>
+    <div class="col-md-3">
+        <label class="form-label">Datum</label>
         <input asp-for="Datum" class="form-control" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
     </div>
-    <div class="form-group">
-        <label>Aktivnost</label>
+    <div class="col-md-5">
+        <label class="form-label">Aktivnost</label>
         <select asp-for="AktivnostId" class="form-control">
             @foreach (var a in aktivnosti)
             {
@@ -18,10 +18,12 @@
             }
         </select>
     </div>
-    <div class="form-group">
-        <label>Trajanje (min)</label>
+    <div class="col-md-2">
+        <label class="form-label">Trajanje (min)</label>
         <input asp-for="Trajanje" class="form-control" />
     </div>
-    <button type="submit" class="btn btn-success btn-sm">Add Activity</button>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-success btn-sm">Dodaj aktivnost</button>
+    </div>
 </form>
 <div id="addProvedbaResult"></div>

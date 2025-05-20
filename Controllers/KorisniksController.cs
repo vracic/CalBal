@@ -11,16 +11,19 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using CalBal.Services;
 
 namespace CalBal.Controllers
 {
     public class KorisniksController : Controller
     {
         private readonly CalbalContext _context;
+        private readonly KorisnikService _korisnikService;
 
-        public KorisniksController(CalbalContext context)
+        public KorisniksController(CalbalContext context, KorisnikService korisnikService)
         {
             _context = context;
+            _korisnikService = korisnikService;
         }
 
         // GET: Korisniks
@@ -28,7 +31,7 @@ namespace CalBal.Controllers
         {
             if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value != Models.Enums.RazinaOvlasti.visoka.ToString())
             {
-                return RedirectToAction("Login", "Korisniks");
+                return RedirectToAction("Login", "Auth");
             }
             return View(await _context.Korisniks.ToListAsync());
         }
@@ -38,22 +41,20 @@ namespace CalBal.Controllers
         {
             if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value != Models.Enums.RazinaOvlasti.visoka.ToString())
             {
-                return RedirectToAction("Login", "Korisniks");
+                return RedirectToAction("Login", "Auth");
             }
             ViewBag.RazinaOvlasti = new SelectList(Enum.GetValues(typeof(RazinaOvlasti)));
             return View();
         }
 
         // POST: Korisniks/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("KorisnikId,Ime,Prezime,Email,Lozinka,DatumRodenja,Visina,Tezina,RazinaOvlasti")] Korisnik korisnik)
         {
             if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value != Models.Enums.RazinaOvlasti.visoka.ToString())
             {
-                return RedirectToAction("Login", "Korisniks");
+                return RedirectToAction("Login", "Auth");
             }
             if (ModelState.IsValid)
             {
@@ -69,7 +70,7 @@ namespace CalBal.Controllers
         {
             if (!User.Identity.IsAuthenticated || (User.FindFirst("RazinaOvlasti")?.Value != Models.Enums.RazinaOvlasti.visoka.ToString() && User.FindFirst("KorisnikId")?.Value != id.ToString()))
             {
-                return RedirectToAction("Login", "Korisniks");
+                return RedirectToAction("Login", "Auth");
             }
             if (id == null)
             {
@@ -86,8 +87,6 @@ namespace CalBal.Controllers
         }
 
         // POST: Korisniks/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("KorisnikId,Ime,Prezime,Email,Lozinka,DatumRodenja,Visina,Tezina,RazinaOvlasti")] Korisnik korisnik)
@@ -96,7 +95,7 @@ namespace CalBal.Controllers
 
             if (!User.Identity.IsAuthenticated || (!isAdmin && User.FindFirst("KorisnikId")?.Value != id.ToString()))
             {
-                return RedirectToAction("Login", "Korisniks");
+                return RedirectToAction("Login", "Auth");
             }
             if (id != korisnik.KorisnikId)
             {
@@ -140,7 +139,7 @@ namespace CalBal.Controllers
         {
             if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value != Models.Enums.RazinaOvlasti.visoka.ToString())
             {
-                return RedirectToAction("Login", "Korisniks");
+                return RedirectToAction("Login", "Auth");
             }
             if (id == null)
             {
@@ -164,7 +163,7 @@ namespace CalBal.Controllers
         {
             if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value != Models.Enums.RazinaOvlasti.visoka.ToString())
             {
-                return RedirectToAction("Login", "Korisniks");
+                return RedirectToAction("Login", "Auth");
             }
             var korisnik = await _context.Korisniks.FindAsync(id);
             if (korisnik != null)
@@ -181,115 +180,15 @@ namespace CalBal.Controllers
             return _context.Korisniks.Any(e => e.KorisnikId == id);
         }
 
-        // GET: Korisniks/Register
-        public IActionResult Register()
-        {
-            if (User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            return View();
-        }
-
-        // POST: Korisniks/Register
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register([Bind("Ime,Prezime,Email,Lozinka,DatumRodenja,Visina,Tezina")] Korisnik korisnik)
-        {
-            if (User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            if (ModelState.IsValid)
-            {
-                // Check if email already exists
-                if (_context.Korisniks.Any(k => k.Email == korisnik.Email))
-                {
-                    ModelState.AddModelError("Email", "Email already registered.");
-                    return View(korisnik);
-                }
-
-                var hasher = new PasswordHasher<Korisnik>();
-                korisnik.Lozinka = hasher.HashPassword(korisnik, korisnik.Lozinka); // Hash the password
-
-                korisnik.RazinaOvlasti = Models.Enums.RazinaOvlasti.niska; // Default role
-                _context.Add(korisnik);
-                await _context.SaveChangesAsync();
-                return RedirectToAction("Login");
-            }
-            return View(korisnik);
-        }
-
-        // GET: Korisniks/Login
-        public IActionResult Login()
-        {
-            if (User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            return View();
-        }
-
-        // POST: Korisniks/Login
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(string email, string lozinka)
-        {
-            if (User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            var korisnik = _context.Korisniks.FirstOrDefault(k => k.Email == email);
-            if (korisnik == null)
-            { 
-                ModelState.AddModelError(string.Empty, "Invalid login attemp.");
-                return View();
-            }
-
-            var hasher = new PasswordHasher<Korisnik>();
-            var result = hasher.VerifyHashedPassword(korisnik, korisnik.Lozinka, lozinka);
-
-            if (result == PasswordVerificationResult.Failed)
-            {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                return View();
-            }
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, korisnik.Email),
-                new Claim("KorisnikId", korisnik.KorisnikId.ToString()),
-                new Claim("RazinaOvlasti", korisnik.RazinaOvlasti.ToString())
-            };
-
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
-
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-            return RedirectToAction("Index", "Home");
-        }
-
-        // GET: Korisniks/Logout
-        public async Task<IActionResult> Logout()
-        {
-            if (!User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Login", "Korisniks");
-            }
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Login");
-        }
-
         // GET: Korisniks/MasterDetail
-        public async Task<IActionResult> MasterDetail()
+        public async Task<IActionResult> MasterDetail(string activitySearch, string foodSearch)
         {
             if (!User.Identity.IsAuthenticated)
-                return RedirectToAction("Login", "Korisniks");
+                return RedirectToAction("Login", "Auth");
 
             var korisnikIdClaim = User.FindFirst("KorisnikId")?.Value;
             if (korisnikIdClaim == null)
-                return RedirectToAction("Login", "Korisniks");
+                return RedirectToAction("Login", "Auth");
 
             if (!int.TryParse(korisnikIdClaim, out int korisnikId))
                 return NotFound();
@@ -304,118 +203,34 @@ namespace CalBal.Controllers
             if (korisnik == null)
                 return NotFound();
 
+            // Filter Provedbatjakts by activity name
+            if (!string.IsNullOrWhiteSpace(activitySearch))
+            {
+                korisnik.Provedbatjakts = korisnik.Provedbatjakts
+                    .Where(p => p.Aktivnost != null && p.Aktivnost.Naziv.Contains(activitySearch, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            // Filter Unosprehnams by food name
+            if (!string.IsNullOrWhiteSpace(foodSearch))
+            {
+                korisnik.Unosprehnams = korisnik.Unosprehnams
+                    .Where(u => u.Hrana != null && u.Hrana.Naziv.Contains(foodSearch, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            foreach (var p in korisnik.Provedbatjakts)
+                p.PotroseneKalorije = _korisnikService.IzracunajPotroseneKalorije(p);
+
+            foreach (var u in korisnik.Unosprehnams)
+                u.UneseneKalorije = _korisnikService.IzracunajUneseneKalorije(u);
+
             ViewBag.Aktivnosti = await _context.Aktivnosts.ToListAsync();
             ViewBag.PrehrambeneNamirnice = await _context.Prehrambenanamirnicas.ToListAsync();
+            ViewBag.ActivitySearch = activitySearch;
+            ViewBag.FoodSearch = foodSearch;
 
             return View(korisnik);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> AddProvedbaAktivnostAjax([FromForm] Provedbatjakt model)
-        {
-            var korisnikIdClaim = User.FindFirst("KorisnikId")?.Value;
-            if (korisnikIdClaim == null || !int.TryParse(korisnikIdClaim, out int korisnikId))
-                return Unauthorized();
-
-            model.KorisnikId = korisnikId;
-            if (ModelState.IsValid)
-            {
-                _context.Provedbatjakts.Add(model);
-                await _context.SaveChangesAsync();
-                return Ok();
-            }
-            return BadRequest(ModelState);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> AddUnosPrehrambenaNamirnicaAjax([FromForm] Unosprehnam model)
-        {
-            var korisnikIdClaim = User.FindFirst("KorisnikId")?.Value;
-            if (korisnikIdClaim == null || !int.TryParse(korisnikIdClaim, out int korisnikId))
-            {
-                return Unauthorized();
-            }
-
-            model.KorisnikId = korisnikId;
-
-            if (ModelState.IsValid)
-            {
-                _context.Unosprehnams.Add(model);
-                await _context.SaveChangesAsync();
-                return Ok();
-            }
-
-            return BadRequest(ModelState);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> DeleteProvedbaAktivnostAjax(int id)
-        {
-            var korisnikIdClaim = User.FindFirst("KorisnikId")?.Value;
-            if (korisnikIdClaim == null || !int.TryParse(korisnikIdClaim, out int korisnikId))
-                return Unauthorized();
-            var provedba = await _context.Provedbatjakts.FindAsync(id);
-            if (provedba == null || provedba.KorisnikId != korisnikId)
-                return NotFound();
-            _context.Provedbatjakts.Remove(provedba);
-            await _context.SaveChangesAsync();
-            return Ok();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> DeleteUnosPrehrambenaNamirnicaAjax(int id)
-        {
-            var korisnikIdClaim = User.FindFirst("KorisnikId")?.Value;
-            if (korisnikIdClaim == null || !int.TryParse(korisnikIdClaim, out int korisnikId))
-                return Unauthorized();
-            var unos = await _context.Unosprehnams.FindAsync(id);
-            if (unos == null || unos.KorisnikId != korisnikId)
-                return NotFound();
-            _context.Unosprehnams.Remove(unos);
-            await _context.SaveChangesAsync();
-            return Ok();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateProvedbaAktivnostAjax([FromForm] Provedbatjakt model)
-        {
-            var korisnikIdClaim = User.FindFirst("KorisnikId")?.Value;
-            if (korisnikIdClaim == null || !int.TryParse(korisnikIdClaim, out int korisnikId))
-                return Unauthorized();
-            var existing = await _context.Provedbatjakts.FindAsync(model.ProvedbaTjAktId);
-            if (existing == null || existing.KorisnikId != korisnikId)
-                return NotFound();
-            existing.Trajanje = model.Trajanje;
-            existing.Datum = model.Datum;
-            existing.AktivnostId = model.AktivnostId;
-            if (ModelState.IsValid)
-            {
-                _context.Update(existing);
-                await _context.SaveChangesAsync();
-                return Ok();
-            }
-            return BadRequest(ModelState);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateUnosPrehrambenaNamirnicaAjax([FromForm] Unosprehnam model)
-        {
-            var korisnikIdClaim = User.FindFirst("KorisnikId")?.Value;
-            if (korisnikIdClaim == null || !int.TryParse(korisnikIdClaim, out int korisnikId))
-                return Unauthorized();
-            var existing = await _context.Unosprehnams.FindAsync(model.UnosPrehNamId);
-            if (existing == null || existing.KorisnikId != korisnikId)
-                return NotFound();
-            existing.Kolicina = model.Kolicina;
-            existing.Datum = model.Datum;
-            existing.HranaId = model.HranaId;
-            if (ModelState.IsValid)
-            {
-                _context.Update(existing);
-                await _context.SaveChangesAsync();
-                return Ok();
-            }
-            return BadRequest(ModelState);
         }
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 namespace CalBal.Models;
@@ -24,6 +25,9 @@ public partial class Provedbatjakt : IValidatableObject
 
     [ValidateNever]
     public virtual Korisnik Korisnik { get; set; } = null!;
+
+    [NotMapped]
+    public decimal PotroseneKalorije { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
