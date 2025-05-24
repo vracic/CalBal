@@ -11,6 +11,10 @@ public partial class CalbalContext : DbContext
 {
     private readonly IConfiguration _configuration;
 
+    public CalbalContext(DbContextOptions<CalbalContext> options) : base(options)
+    {
+        // no configuration needed here for testing
+    }
     public CalbalContext(DbContextOptions<CalbalContext> options, IConfiguration configuration)
     : base(options)
     {

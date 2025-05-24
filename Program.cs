@@ -3,6 +3,7 @@ using CalBal.Models.Enums;
 using CalBal.Data;
 using CalBal.Data.Interfaces;
 using CalBal.Services;
+using CalBal.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -26,13 +27,13 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LogoutPath = "/Korisniks/Logout";
     });
 
-builder.Services.AddScoped<KorisnikService>();
-builder.Services.AddScoped<AktivnostService>();
-builder.Services.AddScoped<PrehrambenaNamirnicaService>();
-builder.Services.AddScoped<ProvedbaTjAktService>();
-builder.Services.AddScoped<UnosPrehNamService>();
-
+builder.Services.AddScoped<IKorisnikService, KorisnikService>();
+builder.Services.AddScoped<IAktivnostService, AktivnostService>();
+builder.Services.AddScoped<IPrehrambenaNamirnicaService, PrehrambenaNamirnicaService>();
+builder.Services.AddScoped<IProvedbaTjAktService, ProvedbaTjAktService>();
+builder.Services.AddScoped<IUnosPrehNamService, UnosPrehNamService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
 builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
 builder.Services.AddScoped<IAktivnostRepository, AktivnostRepository>();
 builder.Services.AddScoped<IPrehrambenaNamirnicaRepository, PrehrambenaNamirnicaRepository>();

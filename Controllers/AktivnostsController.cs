@@ -1,5 +1,5 @@
 ﻿using CalBal.Models;
-using CalBal.Services;
+using CalBal.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -8,9 +8,9 @@ namespace CalBal.Controllers
 {
     public class AktivnostsController : Controller
     {
-        private readonly AktivnostService _service;
+        private readonly IAktivnostService _service;
 
-        public AktivnostsController(AktivnostService service)
+        public AktivnostsController(IAktivnostService service)
         {
             _service = service;
         }

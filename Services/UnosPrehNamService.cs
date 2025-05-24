@@ -1,10 +1,11 @@
 ﻿using CalBal.Models;
+using CalBal.Services.Interfaces;
 using CalBal.Data.Interfaces;
 using System.Threading.Tasks;
 
 namespace CalBal.Services
 {
-    public class UnosPrehNamService
+    public class UnosPrehNamService : IUnosPrehNamService
     {
         private readonly IUnosPrehNamRepository _repository;
         public UnosPrehNamService(IUnosPrehNamRepository repository)

@@ -1,5 +1,5 @@
 ﻿using CalBal.Models;
-using CalBal.Services;
+using CalBal.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -8,9 +8,9 @@ namespace CalBal.Controllers
 {
     public class PrehrambenaNamirnicasController : Controller
     {
-        private readonly PrehrambenaNamirnicaService _service;
+        private readonly IPrehrambenaNamirnicaService _service;
 
-        public PrehrambenaNamirnicasController(PrehrambenaNamirnicaService service)
+        public PrehrambenaNamirnicasController(IPrehrambenaNamirnicaService service)
         {
             _service = service;
         }

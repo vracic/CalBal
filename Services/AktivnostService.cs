@@ -1,9 +1,10 @@
 ﻿using CalBal.Models;
+using CalBal.Services.Interfaces;
 using CalBal.Data.Interfaces;
 
 namespace CalBal.Services
 {
-    public class AktivnostService
+    public class AktivnostService : IAktivnostService
     {
         private readonly IAktivnostRepository _repository;
 

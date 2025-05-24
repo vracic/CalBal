@@ -1,6 +1,6 @@
 ﻿using CalBal.Models;
 using CalBal.Models.Enums;
-using CalBal.Services;
+using CalBal.Services.Interfaces;
 using CalBal.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -19,9 +19,9 @@ namespace CalBal.Controllers
 {
     public class KorisniksController : Controller
     {
-        private readonly KorisnikService _korisnikService;
+        private readonly IKorisnikService _korisnikService;
 
-        public KorisniksController(KorisnikService korisnikService)
+        public KorisniksController(IKorisnikService korisnikService)
         {
             _korisnikService = korisnikService;
         }

@@ -1,5 +1,5 @@
 using CalBal.Models;
-using CalBal.Services;
+using CalBal.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -7,9 +7,9 @@ namespace CalBal.Controllers
 {
     public class ProvedbatjaktController : Controller
     {
-        private readonly ProvedbaTjAktService _service;
+        private readonly IProvedbaTjAktService _service;
 
-        public ProvedbatjaktController(ProvedbaTjAktService service)
+        public ProvedbatjaktController(IProvedbaTjAktService service)
         {
             _service = service;
         }

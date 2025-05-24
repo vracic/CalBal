@@ -1,9 +1,10 @@
-﻿using CalBal.Models;
-using CalBal.Data.Interfaces;
+﻿using CalBal.Data.Interfaces;
+using CalBal.Models;
+using CalBal.Services.Interfaces;
 
 namespace CalBal.Services
 {
-    public class PrehrambenaNamirnicaService
+    public class PrehrambenaNamirnicaService : IPrehrambenaNamirnicaService
     {
         private readonly IPrehrambenaNamirnicaRepository _repository;
 

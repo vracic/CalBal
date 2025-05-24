@@ -1,6 +1,7 @@
 ﻿using CalBal.Models;
 using CalBal.Data.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using CalBal.Services.Interfaces;
 
 public class AuthService : IAuthService
 {

@@ -1,5 +1,5 @@
 using CalBal.Models;
-using CalBal.Services;
+using CalBal.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -7,9 +7,9 @@ namespace CalBal.Controllers
 {
     public class UnosprehnamController : Controller
     {
-        private readonly UnosPrehNamService _service;
+        private readonly IUnosPrehNamService _service;
 
-        public UnosprehnamController(UnosPrehNamService service)
+        public UnosprehnamController(IUnosPrehNamService service)
         {
             _service = service;
         }

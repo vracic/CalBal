@@ -2,10 +2,11 @@ using CalBal.Models;
 using CalBal.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol.Core.Types;
+using CalBal.Services.Interfaces;
 
 namespace CalBal.Services
 {
-    public class KorisnikService
+    public class KorisnikService : IKorisnikService
     {
         private readonly IKorisnikRepository _repository;
 
