@@ -1,188 +1,109 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using CalBal.Models;
+using CalBal.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using CalBal.Models;
+using System.Threading.Tasks;
 
 namespace CalBal.Controllers
 {
     public class AktivnostsController : Controller
     {
-        private readonly CalbalContext _context;
+        private readonly AktivnostService _service;
 
-        public AktivnostsController(CalbalContext context)
+        public AktivnostsController(AktivnostService service)
         {
-            _context = context;
+            _service = service;
         }
 
-        // GET: Aktivnosts
+        [Authorize(Policy = "NiskaRazina")]
         public async Task<IActionResult> Index()
         {
-            if (!User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Login", "Auth");
-            }
-            return View(await _context.Aktivnosts.ToListAsync());
+            var aktivnosti = await _service.DohvatiSveAsync();
+            return View(aktivnosti);
         }
 
-        // GET: Aktivnosts/Details/5
+        [Authorize(Policy = "VisokaRazina")]
         public async Task<IActionResult> Details(int? id)
         {
-            if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
-            {
-                return RedirectToAction("Login", "Auth");
-            }
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var aktivnost = await _context.Aktivnosts
-                .FirstOrDefaultAsync(m => m.AktivnostId == id);
-            if (aktivnost == null)
-            {
-                return NotFound();
-            }
+            var aktivnost = await _service.DohvatiPoIdAsync(id.Value);
+            if (aktivnost == null) return NotFound();
 
             return View(aktivnost);
         }
 
-        // GET: Aktivnosts/Create
+        [Authorize(Policy = "VisokaRazina")]
         public IActionResult Create()
         {
-            if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
-            {
-                return RedirectToAction("Login", "Auth");
-            }
             return View();
         }
 
-        // POST: Aktivnosts/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "VisokaRazina")]
         public async Task<IActionResult> Create([Bind("AktivnostId,Naziv,Potrosnja")] Aktivnost aktivnost)
         {
-            if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
-            {
-                return RedirectToAction("Login", "Auth");
-            }
             if (ModelState.IsValid)
             {
-                _context.Add(aktivnost);
-                await _context.SaveChangesAsync();
+                await _service.DodajAsync(aktivnost);
                 return RedirectToAction(nameof(Index));
             }
             return View(aktivnost);
         }
 
-        // GET: Aktivnosts/Edit/5
+        [Authorize(Policy = "VisokaRazina")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
-            {
-                return RedirectToAction("Login", "Auth");
-            }
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var aktivnost = await _context.Aktivnosts.FindAsync(id);
-            if (aktivnost == null)
-            {
-                return NotFound();
-            }
+            var aktivnost = await _service.DohvatiPoIdAsync(id.Value);
+            if (aktivnost == null) return NotFound();
+
             return View(aktivnost);
         }
 
-        // POST: Aktivnosts/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "VisokaRazina")]
         public async Task<IActionResult> Edit(int id, [Bind("AktivnostId,Naziv,Potrosnja")] Aktivnost aktivnost)
         {
-            if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
-            {
-                return RedirectToAction("Login", "Auth");
-            }
-            if (id != aktivnost.AktivnostId)
-            {
-                return NotFound();
-            }
+            if (id != aktivnost.AktivnostId) return NotFound();
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(aktivnost);
-                    await _context.SaveChangesAsync();
+                    await _service.UrediAsync(aktivnost);
                 }
-                catch (DbUpdateConcurrencyException)
+                catch
                 {
-                    if (!AktivnostExists(aktivnost.AktivnostId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!await _service.PostojiAsync(id)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
             return View(aktivnost);
         }
 
-        // GET: Aktivnosts/Delete/5
+        [Authorize(Policy = "VisokaRazina")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
-            {
-                return RedirectToAction("Login", "Auth");
-            }
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var aktivnost = await _context.Aktivnosts
-                .FirstOrDefaultAsync(m => m.AktivnostId == id);
-            if (aktivnost == null)
-            {
-                return NotFound();
-            }
+            var aktivnost = await _service.DohvatiPoIdAsync(id.Value);
+            if (aktivnost == null) return NotFound();
 
             return View(aktivnost);
         }
 
-        // POST: Aktivnosts/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Policy = "VisokaRazina")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (!User.Identity.IsAuthenticated || User.FindFirst("RazinaOvlasti")?.Value == Models.Enums.RazinaOvlasti.niska.ToString())
-            {
-                return RedirectToAction("Login", "Auth");
-            }
-            var aktivnost = await _context.Aktivnosts.FindAsync(id);
-            if (aktivnost != null)
-            {
-                _context.Aktivnosts.Remove(aktivnost);
-            }
-
-            await _context.SaveChangesAsync();
+            await _service.ObrisiAsync(id);
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool AktivnostExists(int id)
-        {
-            return _context.Aktivnosts.Any(e => e.AktivnostId == id);
         }
     }
 }

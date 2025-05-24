@@ -1,5 +1,7 @@
 using CalBal.Models;
 using CalBal.Models.Enums;
+using CalBal.Data;
+using CalBal.Data.Interfaces;
 using CalBal.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +27,34 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddScoped<KorisnikService>();
+builder.Services.AddScoped<AktivnostService>();
+builder.Services.AddScoped<PrehrambenaNamirnicaService>();
+builder.Services.AddScoped<ProvedbaTjAktService>();
+builder.Services.AddScoped<UnosPrehNamService>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
+builder.Services.AddScoped<IAktivnostRepository, AktivnostRepository>();
+builder.Services.AddScoped<IPrehrambenaNamirnicaRepository, PrehrambenaNamirnicaRepository>();
+builder.Services.AddScoped<IProvedbaTjAktRepository, ProvedbaTjAktRepository>();
+builder.Services.AddScoped<IUnosPrehNamRepository, UnosPrehNamRepository>();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("NiskaRazina", policy =>
+        policy.RequireClaim("RazinaOvlasti", "niska", "srednja", "visoka"));
+
+    options.AddPolicy("SrednjaRazina", policy =>
+        policy.RequireClaim("RazinaOvlasti", "srednja", "visoka"));
+
+    options.AddPolicy("VisokaRazina", policy =>
+        policy.RequireClaim("RazinaOvlasti", "visoka"));
+});
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.AccessDeniedPath = "/Auth/Login";
+});
 
 var app = builder.Build();
 

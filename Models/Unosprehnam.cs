@@ -8,11 +8,11 @@ using System.Linq;
 
 namespace CalBal.Models;
 
-public partial class Unosprehnam : IValidatableObject
+public partial class Unosprehnam
 {
     public int UnosPrehNamId { get; set; }
 
-    [Range(1, 999.99, ErrorMessage = "Quantity must be between 1 and 999.99 (pieces or grams).")]
+    [Range(1, 999.99, ErrorMessage = "Kolicina mora biti izmedu 1 i 999.99!")]
     public decimal Kolicina { get; set; }
 
     public DateOnly Datum { get; set; }

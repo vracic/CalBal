@@ -1,18 +1,17 @@
-using Microsoft.AspNetCore.Mvc;
 using CalBal.Models;
-using Microsoft.EntityFrameworkCore;
+using CalBal.Services;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using System.Security.Claims;
 
 namespace CalBal.Controllers
 {
     public class UnosprehnamController : Controller
     {
-        private readonly CalbalContext _context;
+        private readonly UnosPrehNamService _service;
 
-        public UnosprehnamController(CalbalContext context)
+        public UnosprehnamController(UnosPrehNamService service)
         {
-            _context = context;
+            _service = service;
         }
 
         [HttpPost]
@@ -24,14 +23,17 @@ namespace CalBal.Controllers
 
             model.KorisnikId = korisnikId;
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var (success, errorMessage) = await _service.AddAsync(model);
+            if (!success)
             {
-                _context.Unosprehnams.Add(model);
-                await _context.SaveChangesAsync();
-                return Ok();
+                ModelState.AddModelError(nameof(model.Kolicina), errorMessage ?? "Validation failed.");
+                return BadRequest(ModelState);
             }
 
-            return BadRequest(ModelState);
+            return Ok();
         }
 
         [HttpPost]
@@ -41,7 +43,7 @@ namespace CalBal.Controllers
             if (korisnikIdClaim == null || !int.TryParse(korisnikIdClaim, out int korisnikId))
                 return Unauthorized();
 
-            var existing = await _context.Unosprehnams.FindAsync(model.UnosPrehNamId);
+            var existing = await _service.GetByIdAsync(model.UnosPrehNamId);
             if (existing == null || existing.KorisnikId != korisnikId)
                 return NotFound();
 
@@ -51,8 +53,7 @@ namespace CalBal.Controllers
 
             if (ModelState.IsValid)
             {
-                _context.Update(existing);
-                await _context.SaveChangesAsync();
+                await _service.UpdateAsync(existing);
                 return Ok();
             }
 
@@ -66,12 +67,11 @@ namespace CalBal.Controllers
             if (korisnikIdClaim == null || !int.TryParse(korisnikIdClaim, out int korisnikId))
                 return Unauthorized();
 
-            var unos = await _context.Unosprehnams.FindAsync(id);
-            if (unos == null || unos.KorisnikId != korisnikId)
+            var existing = await _service.GetByIdAsync(id);
+            if (existing == null || existing.KorisnikId != korisnikId)
                 return NotFound();
 
-            _context.Unosprehnams.Remove(unos);
-            await _context.SaveChangesAsync();
+            await _service.DeleteAsync(existing);
             return Ok();
         }
     }

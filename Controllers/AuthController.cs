@@ -1,28 +1,26 @@
 ﻿using CalBal.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace CalBal.Controllers
 {
     public class AuthController : Controller
     {
-        private readonly CalbalContext _context;
+        private readonly IAuthService _authService;
 
-        public AuthController(CalbalContext context)
+        public AuthController(IAuthService authService)
         {
-            _context = context;
+            _authService = authService;
         }
 
         // GET: Auth/Register
         public IActionResult Register()
         {
             if (User.Identity.IsAuthenticated)
-            {
                 return RedirectToAction("Index", "Home");
-            }
             return View();
         }
 
@@ -31,39 +29,30 @@ namespace CalBal.Controllers
 #if !DEBUG
         [ValidateAntiForgeryToken]
 #endif
-        public async Task<IActionResult> Register([Bind("Ime,Prezime,Email,Lozinka,DatumRodenja,Visina,Tezina")] Korisnik korisnik)
+        public async Task<IActionResult> Register([Bind("Ime,Prezime,Email,DatumRodenja,Visina,Tezina")] Korisnik korisnik, string lozinka)
         {
             if (User.Identity.IsAuthenticated)
-            {
                 return RedirectToAction("Index", "Home");
-            }
-            if (ModelState.IsValid)
+
+            if (!ModelState.IsValid)
+                return View(korisnik);
+
+            var (IsSuccess, ErrorMessage) = await _authService.RegisterAsync(korisnik, lozinka);
+
+            if (!IsSuccess)
             {
-                // Check if email already exists
-                if (_context.Korisniks.Any(k => k.Email == korisnik.Email))
-                {
-                    ModelState.AddModelError("Email", "Email already registered.");
-                    return View(korisnik);
-                }
-
-                var hasher = new PasswordHasher<Korisnik>();
-                korisnik.Lozinka = hasher.HashPassword(korisnik, korisnik.Lozinka); // Hash the password
-
-                korisnik.RazinaOvlasti = Models.Enums.RazinaOvlasti.niska; // Default role
-                _context.Add(korisnik);
-                await _context.SaveChangesAsync();
-                return RedirectToAction("Login");
+                ModelState.AddModelError("Email", ErrorMessage ?? "Registration failed.");
+                return View(korisnik);
             }
-            return View(korisnik);
+
+            return RedirectToAction("Login");
         }
 
         // GET: Auth/Login
         public IActionResult Login()
         {
             if (User.Identity.IsAuthenticated)
-            {
                 return RedirectToAction("Index", "Home");
-            }
             return View();
         }
 
@@ -75,20 +64,11 @@ namespace CalBal.Controllers
         public async Task<IActionResult> Login(string email, string lozinka)
         {
             if (User.Identity.IsAuthenticated)
-            {
                 return RedirectToAction("Index", "Home");
-            }
-            var korisnik = _context.Korisniks.FirstOrDefault(k => k.Email == email);
-            if (korisnik == null)
-            {
-                ModelState.AddModelError(string.Empty, "Invalid login attemp.");
-                return View();
-            }
 
-            var hasher = new PasswordHasher<Korisnik>();
-            var result = hasher.VerifyHashedPassword(korisnik, korisnik.Lozinka, lozinka);
+            var (IsSuccess, korisnik) = await _authService.LoginAsync(email, lozinka);
 
-            if (result == PasswordVerificationResult.Failed)
+            if (!IsSuccess || korisnik == null)
             {
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                 return View();
@@ -113,9 +93,8 @@ namespace CalBal.Controllers
         public async Task<IActionResult> Logout()
         {
             if (!User.Identity.IsAuthenticated)
-            {
                 return RedirectToAction("Login", "Auth");
-            }
+
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login");
         }

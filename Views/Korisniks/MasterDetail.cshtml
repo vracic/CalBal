@@ -1,4 +1,4 @@
-@model CalBal.Models.Korisnik
+@model CalBal.ViewModels.KorisnikMasterDetailViewModel
 @using Microsoft.AspNetCore.Mvc.ViewFeatures
 @inject Microsoft.AspNetCore.Mvc.ModelBinding.IModelMetadataProvider MetadataProvider
 
@@ -8,23 +8,23 @@
 
 <h2>Korisnicki podaci</h2>
 <div>
-    <h4>@Model.Ime @Model.Prezime</h4>
-    <p>Email: @Model.Email</p>
-    <p>Datum rodenja: @Model.DatumRodenja?.ToString("yyyy-MM-dd")</p>
-    <p>Visina: @Model.Visina</p>
-    <p>Tezina: @Model.Tezina</p>
-    <p>Uloga: @Model.RazinaOvlasti</p>
-    <a asp-action="Edit" asp-route-id="@Model.KorisnikId" class="btn btn-primary btn-sm">Uredi korisnika</a>
+    <h4>@Model.Korisnik.Ime @Model.Korisnik.Prezime</h4>
+    <p>Email: @Model.Korisnik.Email</p>
+    <p>Datum rodenja: @Model.Korisnik.DatumRodenja?.ToString("yyyy-MM-dd")</p>
+    <p>Visina: @Model.Korisnik.Visina</p>
+    <p>Tezina: @Model.Korisnik.Tezina</p>
+    <p>Uloga: @Model.Korisnik.RazinaOvlasti</p>
+    <a asp-action="Edit" asp-route-id="@Model.Korisnik.KorisnikId" class="btn btn-primary btn-sm">Uredi korisnika</a>
 </div>
 
 <hr />
 
 <form method="get" asp-action="MasterDetail" class="row g-2 mb-3">
     <div class="col-auto">
-        <input type="text" name="activitySearch" value="@ViewBag.ActivitySearch" class="form-control" placeholder="Pretrazi aktivnosti..." />
+        <input type="text" name="activitySearch" value="@Model.ActivitySearch" class="form-control" placeholder="Pretrazi aktivnosti..." />
     </div>
     <div class="col-auto">
-        <input type="text" name="foodSearch" value="@ViewBag.FoodSearch" class="form-control" placeholder="Pretrazi namirnice..." />
+        <input type="text" name="foodSearch" value="@Model.FoodSearch" class="form-control" placeholder="Pretrazi namirnice..." />
     </div>
     <div class="col-auto">
         <button type="submit" class="btn btn-primary">Pretrazi</button>
@@ -41,7 +41,7 @@
     @await Html.PartialAsync(
         "_AddProvedbaAktivnostPartial",
         new CalBal.Models.Provedbatjakt(),
-        new ViewDataDictionary(MetadataProvider, ViewData.ModelState) { { "Aktivnosti", ViewBag.Aktivnosti }, { "KorisnikId", Model.KorisnikId } }
+        new ViewDataDictionary(MetadataProvider, ViewData.ModelState) { { "Aktivnosti", Model.SveAktivnosti }, { "KorisnikId", Model.Korisnik.KorisnikId } }
     )
     <div id="addProvedbaSuccess"></div>
     <table class="table">
@@ -55,7 +55,7 @@
             </tr>
         </thead>
         <tbody>
-        @foreach (var p in Model.Provedbatjakts)
+            @foreach (var p in Model.Korisnik.Provedbatjakts)
         {
             <tr id="row-provedba-@p.ProvedbaTjAktId">
                 <td>@p.Datum.ToString("yyyy-MM-dd")</td>
@@ -75,7 +75,7 @@
                     </td>
                     <td>
                         <select name="AktivnostId" class="form-control">
-                            @foreach (var a in ViewBag.Aktivnosti)
+                            @foreach (var a in Model.SveAktivnosti)
                             {
                                 <option value="@a.AktivnostId" selected="@(a.AktivnostId == p.AktivnostId ? "selected" : null)">@a.Naziv</option>
                             }
@@ -106,7 +106,7 @@
     @await Html.PartialAsync(
         "_AddUnosPrehrambenaNamirnicaPartial",
         new CalBal.Models.Unosprehnam(),
-        new ViewDataDictionary(MetadataProvider, ViewData.ModelState) { { "PrehrambeneNamirnice", ViewBag.PrehrambeneNamirnice }, { "KorisnikId", Model.KorisnikId} }
+        new ViewDataDictionary(MetadataProvider, ViewData.ModelState) { { "PrehrambeneNamirnice", Model.SveNamirnice }, { "KorisnikId", Model.Korisnik.KorisnikId } }
     )
     <div id="addUnosSuccess"></div>
     <table class="table">
@@ -120,7 +120,7 @@
             </tr>
         </thead>
         <tbody>
-        @foreach (var u in Model.Unosprehnams)
+            @foreach (var u in Model.Korisnik.Unosprehnams)
         {
             <tr id="row-unos-@u.UnosPrehNamId">
                 <td>@u.Datum.ToString("yyyy-MM-dd")</td>
@@ -140,7 +140,7 @@
                     </td>
                     <td>
                         <select name="HranaId" class="form-control">
-                            @foreach (var n in ViewBag.PrehrambeneNamirnice)
+                            @foreach (var n in Model.SveNamirnice)
                             {
                                 <option value="@n.PrehrambenaNamirnicaId" selected="@(n.PrehrambenaNamirnicaId == u.HranaId ? "selected" : null)">@n.Naziv</option>
                             }

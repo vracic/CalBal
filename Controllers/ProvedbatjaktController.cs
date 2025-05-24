@@ -1,18 +1,17 @@
-using Microsoft.AspNetCore.Mvc;
 using CalBal.Models;
-using Microsoft.EntityFrameworkCore;
+using CalBal.Services;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using System.Security.Claims;
 
 namespace CalBal.Controllers
 {
     public class ProvedbatjaktController : Controller
     {
-        private readonly CalbalContext _context;
+        private readonly ProvedbaTjAktService _service;
 
-        public ProvedbatjaktController(CalbalContext context)
+        public ProvedbatjaktController(ProvedbaTjAktService service)
         {
-            _context = context;
+            _service = service;
         }
 
         [HttpPost]
@@ -23,13 +22,19 @@ namespace CalBal.Controllers
                 return Unauthorized();
 
             model.KorisnikId = korisnikId;
-            if (ModelState.IsValid)
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var (Success, ErrorMessage) = await _service.AddAsync(model);
+
+            if (!Success)
             {
-                _context.Provedbatjakts.Add(model);
-                await _context.SaveChangesAsync();
-                return Ok();
+                ModelState.AddModelError(string.Empty, ErrorMessage);
+                return BadRequest(ModelState);
             }
-            return BadRequest(ModelState);
+
+            return Ok();
         }
 
         [HttpPost]
@@ -39,12 +44,11 @@ namespace CalBal.Controllers
             if (korisnikIdClaim == null || !int.TryParse(korisnikIdClaim, out int korisnikId))
                 return Unauthorized();
 
-            var provedba = await _context.Provedbatjakts.FindAsync(id);
+            var provedba = await _service.GetByIdAsync(id);
             if (provedba == null || provedba.KorisnikId != korisnikId)
                 return NotFound();
 
-            _context.Provedbatjakts.Remove(provedba);
-            await _context.SaveChangesAsync();
+            await _service.DeleteAsync(provedba);
             return Ok();
         }
 
@@ -55,7 +59,7 @@ namespace CalBal.Controllers
             if (korisnikIdClaim == null || !int.TryParse(korisnikIdClaim, out int korisnikId))
                 return Unauthorized();
 
-            var existing = await _context.Provedbatjakts.FindAsync(model.ProvedbaTjAktId);
+            var existing = await _service.GetByIdAsync(model.ProvedbaTjAktId);
             if (existing == null || existing.KorisnikId != korisnikId)
                 return NotFound();
 
@@ -65,8 +69,7 @@ namespace CalBal.Controllers
 
             if (ModelState.IsValid)
             {
-                _context.Update(existing);
-                await _context.SaveChangesAsync();
+                await _service.UpdateAsync(existing);
                 return Ok();
             }
             return BadRequest(ModelState);
